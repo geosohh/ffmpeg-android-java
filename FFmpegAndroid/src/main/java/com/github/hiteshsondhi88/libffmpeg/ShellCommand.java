@@ -1,13 +1,37 @@
 package com.github.hiteshsondhi88.libffmpeg;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 class ShellCommand {
 
     Process run(String commandString) {
         Process process = null;
+
+        boolean foundDoubleQuotes = false;
+        String cmdPart = "";
+        ArrayList<String> tempList = new ArrayList<String>();
+        for (int i=0;i<commandString.length();i++){
+            if (commandString.charAt(i)==' ' && !foundDoubleQuotes) {
+                tempList.add(cmdPart);
+                cmdPart = "";
+            } else if (commandString.charAt(i)=='"') {
+                foundDoubleQuotes = !foundDoubleQuotes;
+            } else {
+                cmdPart+=commandString.charAt(i);
+            }
+        }
+        if (cmdPart.length()>0) {
+            tempList.add(cmdPart);
+        }
+        String[] command = tempList.toArray(new String[tempList.size()]);
+
+        for (String c : command){
+            Log.d("commandPart: "+c);
+        }
+
         try {
-            process = Runtime.getRuntime().exec(commandString);
+            process = Runtime.getRuntime().exec(command);
         } catch (IOException e) {
             Log.e("Exception while trying to run: " + commandString, e);
         }
